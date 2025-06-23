@@ -1,37 +1,51 @@
 import streamlit as st
 import joblib
 
-# Load the trained model and vectorizer
-model = joblib.load("sentiment_model.pkl")
-vectorizer = joblib.load("vectorizer.pkl")
+# Load model and vectorizer
+model = joblib.load("model/sentiment_model.pkl")
+vectorizer = joblib.load("model/vectorizer.pkl")
 
-# App title
+# App Title
 st.title("🎬 Movie Review Sentiment Analyzer")
 
-# User input
-review = st.text_area("Enter a movie review below:")
+# Input from user
+review = st.text_area("Enter your movie review below:")
 
 # Analyze button
 if st.button("Analyze Sentiment"):
     if not review.strip():
-        st.warning("⚠️ Please enter a review!")
+        st.warning("⚠️ Please enter a review to analyze!")
     else:
         review_lower = review.lower()
 
-        # Optional keyword override
+        # ✅ Manual override for known keywords (optional)
         if "electric" in review_lower and "chemistry" in review_lower:
             sentiment = "Positive 😊"
+            confidence_note = "Manual override applied based on keywords."
         else:
-            # Vectorize and predict sentiment
+            # Vectorize input
             vector = vectorizer.transform([review])
-            prediction = model.predict(vector)[0]
+            # Predict probability for positive class
+            if hasattr(model, "predict_proba"):
+                prob = model.predict_proba(vector)[0]
+                pos_prob = prob[1]  # Probability of positive class
 
-            if prediction == "positive":
-                sentiment = "Positive 😊"
-            elif prediction == "negative":
-                sentiment = "Negative 😞"
+                # Neutral threshold logic
+                if 0.40 <= pos_prob <= 0.57:
+                    sentiment = "Neutral 😐"
+                elif pos_prob > 0.55:
+                    sentiment = "Positive 😊"
+                else:
+                    sentiment = "Negative 😞"
+
+                confidence_note = f"Confidence: Positive = {pos_prob:.2f}, Negative = {1 - pos_prob:.2f}"
+
             else:
-                sentiment = f"Unknown: {prediction}"  # fallback if label isn't expected
+                # Fallback if predict_proba not available
+                prediction = model.predict(vector)[0]
+                sentiment = "Positive 😊" if prediction == "positive" else "Negative 😞"
+                confidence_note = "(Probability not available — fallback to label only)"
 
-        # Show result
+        # Output result
         st.success(f"🎯 Sentiment: **{sentiment}**")
+        st.info(confidence_note)
