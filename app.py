@@ -31,7 +31,7 @@ if st.button("Analyze Sentiment"):
                 pos_prob = prob[1]  # Probability of positive class
 
                 # Neutral threshold logic
-                if 0.40 <= pos_prob <= 0.57:
+                if 0.45 <= pos_prob <= 0.55:
                     sentiment = "Neutral 😐"
                 elif pos_prob > 0.55:
                     sentiment = "Positive 😊"
