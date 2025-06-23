@@ -22,12 +22,11 @@ if st.button("Analyze Sentiment"):
 
         # Classify based on probability
         if 0.45 <= pos_prob <= 0.55:
-            sentiment = "Neutral"
+            sentiment = "Neutral 😐"
         elif pos_prob > 0.55:
-            sentiment = "Positive"
+            sentiment = "Positive 😊"
         else:
-            sentiment = "Negative"
-
+            sentiment = "Negative 😞"
 
         # Show probability (optional)
         st.write(f"🧠 Confidence: Positive = {pos_prob:.2f}, Negative = {1 - pos_prob:.2f}")
